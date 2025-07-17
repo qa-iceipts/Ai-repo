@@ -2,8 +2,12 @@
   "name": "requisition-service",
   "version": "1.0.0",
   "main": "src/app.ts",
+  "type": "module",
   "scripts": {
-    "start": "ts-node src/app.ts"
+    "start": "ts-node --esm src/app.ts",
+    "dev": "ts-node --watch src/app.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.22",
@@ -16,7 +20,8 @@
     "express": "^4.18.2"
   },
   "devDependencies": {
-    "ts-node": "^10.9.1",
+    "@types/node": "^24.0.14",
+    "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   }
 }

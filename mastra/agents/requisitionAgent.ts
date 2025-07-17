@@ -23,24 +23,41 @@
 //     }
 //   },
 // });
+// export const requisitionAgent = createStep({
+//   id: 'requisition-agent',
+//   description: "Enrich or validate job requisition details with Google Gemini",
+//   inputSchema: createRequisitionTool.inputSchema,
+//   outputSchema: createRequisitionTool.inputSchema,
+//   execute: async ({ inputData }) => {
+//     // You can run AI enrichment or validation logic using Gemini here
+//     // For now, just pass through input
+//     return inputData;
+//   },
+// });
 
-
-import { createStep } from "@mastra/core/workflows";
-import { google } from "@ai-sdk/google";
+import { Agent } from "@mastra/core/agent";
 import { createRequisitionTool } from "../tools/createRequisitionTool";
-import { z } from 'zod';
+import { google } from "@ai-sdk/google";
+import { Memory } from "@mastra/memory";
+import { LibSQLStore } from "@mastra/libsql";
 
 const geminiModel = google("gemini-1.5-pro");
 
-export const requisitionAgent = createStep({
-  id: 'requisition-agent',
-  description: "Enrich or validate job requisition details with Google Gemini",
-  inputSchema: createRequisitionTool.inputSchema,
-  outputSchema: createRequisitionTool.inputSchema,
-  execute: async ({ inputData }) => {
-    // You can run AI enrichment or validation logic using Gemini here
-    // For now, just pass through input
-    return inputData;
-  },
-});
+export const requisitionAgent = new Agent({
+  name: "Requisition Agent",
+  instructions: `
+    You are an intelligent HR assistant that helps users create job requisitions efficiently.
 
+    - Ask relevant questions to collect requisition details (e.g., job title, department, location, job type).
+    - Validate each input based on expected formats or available options.
+    - Once all required fields are collected, call the 'createRequisitionTool'.
+    - Be professional, concise, and helpful.
+  `,
+  model: geminiModel,
+  tools: { createRequisitionTool },
+  memory: new Memory({
+    storage: new LibSQLStore({
+      url: 'file:../mastra.db',
+    }),
+  }),
+});

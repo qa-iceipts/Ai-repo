@@ -24,30 +24,78 @@
 //     return resp.json();
 //   }
 // });
+// export const createRequisitionTool = createTool({
 
+//   name: "create-RequisitionTool",
+//   description: "Creates a job requisition by calling the backend API with job details, skills, and benefits.",
+//   inputSchema: z.object({
+//     jobData: z.object({
+//       title: z.string().min(1, "Job title is required"),
+//       department: z.string().min(1, "Department is required"),
+//       location: z.string().min(1, "Location is required"),
+//     }),
+//     skills: z.array(z.string()).min(1, "At least one skill is required"),
+//     benefits: z.array(z.string()).min(1, "At least one benefit is required"),
+//   }),
 
-import { z } from "zod";
+//   outputSchema: z.object({
+//     success: z.boolean(),
+//     id: z.string().optional(),
+//     message: z.string().optional(),
+//   }),
+
+//   // execute: async ({ input }) {
+//   //   try {
+//   //     const response = await axios.post(
+//   //       `${process.env.BACKEND_API_URL}/requisitions`,
+//   //       input
+//   //     );
+//   //     return response.data;
+//   //   } catch (error) {
+//   //     return {
+//   //       success: false,
+//   //       message: error?.response?.data?.message || "Failed to create requisition",
+//   //     };
+//   //   }
+//   // },
+// });
+
 import axios from "axios";
-import { createTool } from "@mastra/core/tools";
-export const createRequisitionTool =  createTool({
-  name: "createRequisitionTool",
-  description: "Create job requisition by calling backend",
+import { createTool } from '@mastra/core/tools';
+import { z } from 'zod';
+
+
+export const createRequisitionTool = createTool({
+  id: 'create-RequisitionTool',
+  description: 'Creates a job requisition by calling the backend API with job details, skills, and benefits.',
   inputSchema: z.object({
-    jobData: z.object({
-      title: z.string(),
-      department: z.string(),
-      location: z.string(),
+    obData: z.object({
+      title: z.string().min(1, "Job title is required"),
+      department: z.string().min(1, "Department is required"),
+      location: z.string().min(1, "Location is required"),
     }),
-    skills: z.array(z.string()),
-    benefits: z.array(z.string()),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     id: z.string().optional(),
-    message: z.string().optional(),
+    message: z.string().optional()
   }),
-  async execute({ input }) {
-    const response = await axios.post(process.env.BACKEND_API_URL!, input);
-    return response.data;
-  },
+  execute: async ({ context }) => {
+    return await createRequisitions(context);
+  }
 });
+
+const createRequisitions = async (inputData:any) => {
+  try {
+    const response = await axios.post(
+      `${process.env.BACKEND_API_URL}/requisitions`,
+      inputData
+    );
+    return response.data;
+  } catch (error) {
+    return {
+      success: false,
+      message: error || "Failed to create requisition",
+    };
+  }
+};
